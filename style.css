@@ -1,0 +1,97 @@
+body {
+  background-color: black; /* 设置页面背景为黑色，模拟终端风格 */
+  color: #00ff00; /* 设置字体颜色为绿色 */
+  font-family: monospace, monospace; /* 使用等宽字体，模拟终端显示效果 */
+  margin: 0; /* 去除默认外边距，使内容贴边显示 */
+  height: 100vh; /* 设置页面高度占满整个可视区域 */
+  display: flex; /* 启用 Flex 布局 */
+  justify-content: center; /* 水平方向居中对齐内容 */
+  align-items: center; /* 垂直方向居中对齐内容 */
+}
+
+#terminal {
+  width: 600px; /* 设置终端窗口宽度 */
+  height: 400px; /* 设置终端窗口高度 */
+  background-color: #111111; /* 设置终端背景为深灰色，提升对比度 */
+  padding: 10px; /* 添加内边距，避免文字紧贴边缘 */
+  padding-top: 60px;
+  white-space: pre-wrap; /* 允许文本自动换行 */
+  overflow-y: auto; /* 内容溢出时显示滚动条 */
+  font-size: 16px; /* 设置字体大小 */
+  line-height: 1.5; /* 设置行间距，增强可读性 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.cursor {
+  color: #00ff00; /* 设置光标颜色为绿色 */
+  animation: blink 1s step-start 0s infinite; /* 添加闪烁动画 */
+}
+
+.user-line .cursor {
+  color: #ff5555; /* 用户光标为红色 */
+}
+
+.system-line .cursor {
+  color: #00ff00; /* 系统光标保持绿色 */
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0; /* 设置光标闪烁时的透明状态 */
+  }
+}
+
+.start-button {
+  align-self: center;
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 2px solid #00ff00;
+  background-color: black;
+  color: #00ff00;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 2px solid #00ff00;
+  background-color: #111111;
+  padding: 10px;
+}
+
+.user {
+  color: #ff5555; /* 用户文字为红色 */
+  align-self: flex-start; /* 靠左对齐 */
+}
+
+.system {
+  color: #00ff00; /* 终端回复为绿色 */
+  align-self: flex-start; /* 靠左对齐 */
+}
+
+.user-line .text {
+  color: #ff5555; /* 用户打字时为红色 */
+}
+
+.system-line .text {
+  color: #00ff00; /* 系统打字时为绿色 */
+}
+
+/* 隐藏滚动条但保留滚动功能 */
+#terminal::-webkit-scrollbar {
+  display: none;
+}
+#terminal {
+  -ms-overflow-style: none; /* IE 和 Edge */
+  scrollbar-width: none; /* Firefox */
+}
