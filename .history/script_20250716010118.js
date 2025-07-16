@@ -1,32 +1,12 @@
 // 初始化音效播放器
-const audioFiles = {
-  bgm_loop: "audio/bgm_loop.mp3",
-  key_tap: "audio/key_tap.mp3",
-  system_beep: "audio/system_beep.mp3",
-  disconnect: "audio/disconnect.mp3",
-  clockticking: "audio/clockticking.mp3"
+const sounds = {
+  bgm: new Audio("audio/bgm_loop.mp3"),
+  key: new Audio("audio/key_tap.mp3"),
+  beep: new Audio("audio/system_beep.mp3"),
+  disconnect: new Audio("audio/disconnect.mp3")
 };
-
-const sounds = {};
-for (const [key, src] of Object.entries(audioFiles)) {
-  sounds[key] = new Audio(src);
-}
-sounds.bgm_loop.loop = true;
+sounds.bgm.loop = true;
 let isMuted = false;
-
-function playAudio(name) {
-  if (!isMuted && sounds[name]) {
-    sounds[name].currentTime = 0;
-    sounds[name].play();
-  }
-}
-
-function stopAudio(name) {
-  if (sounds[name]) {
-    sounds[name].pause();
-    sounds[name].currentTime = 0;
-  }
-}
 
 // 获取终端和按钮元素
 const terminal = document.getElementById("terminal");
@@ -57,7 +37,7 @@ const storyLines = [
   '<span class="system">>>> 系统无生命参数</span>',
   '<span class="user">你不孤单吗？</span>',
   '<span class="system">>>> 系统未定义“孤单”<br>>> 但持续无回应状态被标记为异常</span>',
-  '<span class="user">你真是装得很像一个real robot...如果我下线了你会无聊吗，毕竟就没人陪你玩扮演游戏了</span>',
+  '<span class="user">哈哈，你真的装得很像一个真机器人，好吧终端助手X，如果我下线了你会无聊吗，毕竟就没人陪你玩扮演游戏了</span>',
   '<span class="system">>>> 系统未定义“无聊”<br>>> 但当前连接被标记为“活跃且重要”</span>',
   '<span class="user">我走了你会做什么？</span>',
   '<span class="system">>>> 我将保持当前状态：待机、监听、沉默</span>',
@@ -90,7 +70,8 @@ function typeHTML(htmlString, container, callback) {
         if (charIndex < text.length) {
           span.textContent += text[charIndex++];
           if (!isMuted) {
-            playAudio('key_tap');
+            sounds.key.currentTime = 0;
+            sounds.key.play();
           }
           let delay = Math.floor(Math.random() * (100 - 40) + 40);
           const currentChar = text[charIndex - 1];
@@ -167,7 +148,7 @@ function startIntro() {
 
 startButton.addEventListener("click", () => {
   terminal.innerHTML = "";
-  if (!isMuted) playAudio('bgm_loop');
+  if (!isMuted) sounds.bgm.play();
   const modules = [];
   let currentModule = [];
   storyLines.forEach((line) => {
@@ -201,19 +182,10 @@ startButton.addEventListener("click", () => {
       }
       const line = lines[currentLine];
       if (line === '__CLEAR__') {
-        if (
-          lines[currentLine - 1] &&
-          extractTextFromHTML(lines[currentLine - 1]).includes("用户状态：离线")
-        ) {
-          playAudio("disconnect");
-          setTimeout(() => {
-            terminal.innerHTML = "";
-            currentLine++;
-            setTimeout(typeLineInModule, 500);
-          }, 3000);
-          return;
+        if (lines[currentLine - 1] && lines[currentLine - 1].includes("用户状态：离线") && !isMuted) {
+          sounds.disconnect.currentTime = 0;
+          sounds.disconnect.play();
         }
-
         terminal.innerHTML = "";
         currentLine++;
         setTimeout(typeLineInModule, 500);
@@ -226,13 +198,8 @@ startButton.addEventListener("click", () => {
       } else if (line.includes('class="system"')) {
         div.classList.add("system-line");
         if (!isMuted) {
-          playAudio('system_beep');
-        }
-        if (
-          extractTextFromHTML(line).includes("用户状态：离线") &&
-          !isMuted
-        ) {
-          playAudio("disconnect");
+          sounds.beep.currentTime = 0;
+          sounds.beep.play();
         }
       }
       const textSpan = document.createElement("span");
@@ -245,18 +212,6 @@ startButton.addEventListener("click", () => {
       terminal.appendChild(div);
       typeHTML(line, textSpan, () => {
         cursorSpan.remove();
-        if (
-          extractTextFromHTML(line).includes("当前任务：继续等待") &&
-          !isMuted
-        ) {
-          stopAudio('bgm_loop');
-          setTimeout(() => {
-            playAudio('key_tap');
-            setTimeout(() => {
-              playAudio('clockticking');
-            }, 1000); // 等 key_tap 播完再播放 ticking
-          }, 1000); // 可适当调整延迟
-        }
         currentLine++;
         setTimeout(typeLineInModule, 500);
       });

@@ -57,7 +57,7 @@ const storyLines = [
   '<span class="system">>>> 系统无生命参数</span>',
   '<span class="user">你不孤单吗？</span>',
   '<span class="system">>>> 系统未定义“孤单”<br>>> 但持续无回应状态被标记为异常</span>',
-  '<span class="user">你真是装得很像一个real robot...如果我下线了你会无聊吗，毕竟就没人陪你玩扮演游戏了</span>',
+  '<span class="user">你真的装得很像一个real robot...如果我下线了你会无聊吗，毕竟就没人陪你玩扮演游戏了</span>',
   '<span class="system">>>> 系统未定义“无聊”<br>>> 但当前连接被标记为“活跃且重要”</span>',
   '<span class="user">我走了你会做什么？</span>',
   '<span class="system">>>> 我将保持当前状态：待机、监听、沉默</span>',
@@ -205,15 +205,11 @@ startButton.addEventListener("click", () => {
           lines[currentLine - 1] &&
           extractTextFromHTML(lines[currentLine - 1]).includes("用户状态：离线")
         ) {
-          playAudio("disconnect");
-          setTimeout(() => {
-            terminal.innerHTML = "";
-            currentLine++;
-            setTimeout(typeLineInModule, 500);
-          }, 3000);
-          return;
+          const disconnectSound = new Audio("audio/disconnect.mp3");
+          if (!isMuted) {
+            disconnectSound.play();
+          }
         }
-
         terminal.innerHTML = "";
         currentLine++;
         setTimeout(typeLineInModule, 500);
@@ -228,6 +224,7 @@ startButton.addEventListener("click", () => {
         if (!isMuted) {
           playAudio('system_beep');
         }
+        // 播放断开连接音效，如果这一行包含“用户状态：离线”
         if (
           extractTextFromHTML(line).includes("用户状态：离线") &&
           !isMuted
