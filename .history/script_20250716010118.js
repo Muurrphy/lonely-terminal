@@ -182,11 +182,7 @@ startButton.addEventListener("click", () => {
       }
       const line = lines[currentLine];
       if (line === '__CLEAR__') {
-        if (
-          lines[currentLine - 1] &&
-          extractTextFromHTML(lines[currentLine - 1]).includes("用户状态：离线") &&
-          !isMuted
-        ) {
+        if (lines[currentLine - 1] && lines[currentLine - 1].includes("用户状态：离线") && !isMuted) {
           sounds.disconnect.currentTime = 0;
           sounds.disconnect.play();
         }
@@ -216,21 +212,6 @@ startButton.addEventListener("click", () => {
       terminal.appendChild(div);
       typeHTML(line, textSpan, () => {
         cursorSpan.remove();
-        if (
-          extractTextFromHTML(line).includes("当前任务：继续等待") &&
-          !isMuted &&
-          sounds.key
-        ) {
-          sounds.bgm.pause();
-          sounds.bgm.currentTime = 0;
-          // if (sounds.bgm_wait) {
-          //   sounds.bgm_wait.play();
-          // }
-          setTimeout(() => {
-            sounds.key.currentTime = 0;
-            sounds.key.play();
-          }, 600); // 稍作停顿，更像“孤独开始”的声音
-        }
         currentLine++;
         setTimeout(typeLineInModule, 500);
       });

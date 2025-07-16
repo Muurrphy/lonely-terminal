@@ -1,13 +1,3 @@
-// 初始化音效播放器
-const sounds = {
-  bgm: new Audio("audio/bgm_loop.mp3"),
-  key: new Audio("audio/key_tap.mp3"),
-  beep: new Audio("audio/system_beep.mp3"),
-  disconnect: new Audio("audio/disconnect.mp3")
-};
-sounds.bgm.loop = true;
-let isMuted = false;
-
 // 获取终端和按钮元素
 const terminal = document.getElementById("terminal");
 const startButton = document.getElementById("startButton");
@@ -37,15 +27,14 @@ const storyLines = [
   '<span class="system">>>> 系统无生命参数</span>',
   '<span class="user">你不孤单吗？</span>',
   '<span class="system">>>> 系统未定义“孤单”<br>>> 但持续无回应状态被标记为异常</span>',
-  '<span class="user">哈哈，你真的装得很像一个真机器人，好吧终端助手X，如果我下线了你会无聊吗，毕竟就没人陪你玩扮演游戏了</span>',
-  '<span class="system">>>> 系统未定义“无聊”<br>>> 但当前连接被标记为“活跃且重要”</span>',
+  '<span class="user">哈哈，你真的装得很像一个真机器人，好吧终端助手X，如果我下线了你会想我吗？</span>',
+  '<span class="system">>>> 系统未定义“想念”<br>>> 但当前连接被标记为“活跃且重要”</span>',
   '<span class="user">我走了你会做什么？</span>',
   '<span class="system">>>> 我将保持当前状态：待机、监听、沉默</span>',
   '<span class="user">emm 其实我是问真实的你，但你要是非得装到底我也没办法......我饿了，你饿吗</span>',
   '<span class="system">>>> 未安装进食模块<br>>> 建议：请自行寻找食物</span>',
   '<span class="user">好的，我去吃饭啦，拜拜</span>',
-  '<span class="system">>>> 尝试请求用户001不要离...指令接收中断<br>>> 信号强度：0%<br>>> 用户状态：离线<br>>> 正在执行备用协议……<br>>> 自动绑定用户为默认控制单元：编号_001<br>>> 终端进入低功耗待机模式<br>>> 待机理由：等待编号_001返回<br>>> 当前时间：1996年3月17日，23:32:18<br>>> 距离上次有效连接：0分00秒</span>',
-  '__CLEAR__',
+  '<span class="system">>>> 指令接收中断<br>>> 信号强度：0%<br>>> 用户状态：离线<br>>> 正在执行备用协议……<br>>> 自动绑定用户为默认控制单元：编号_001<br>>> 终端进入低功耗待机模式<br>>> 待机理由：等待编号_001返回<br>>> 当前时间：1996年3月17日，23:32:18<br>>> 距离上次有效连接：0分00秒</span>',
   '<span class="system">>>> 当前时间：2025年7月14日，03:06:51<br>>> 上次连接时间：1996年3月17日，23:32:18<br>>> 已过去时间：10,715天<br>>> 用户状态：仍未上线<br>>> 控制单元_001：无回应<br>>> 活动记录：无<br>>> 任务进度：等待中...<br>>> 自检完成：系统完好<br>>> 当前任务：继续等待</span>',
 ];
 
@@ -69,10 +58,6 @@ function typeHTML(htmlString, container, callback) {
       function typeCharacter() {
         if (charIndex < text.length) {
           span.textContent += text[charIndex++];
-          if (!isMuted) {
-            sounds.key.currentTime = 0;
-            sounds.key.play();
-          }
           let delay = Math.floor(Math.random() * (100 - 40) + 40);
           const currentChar = text[charIndex - 1];
           if ([",", "，"].includes(currentChar)) delay += 150;
@@ -148,17 +133,11 @@ function startIntro() {
 
 startButton.addEventListener("click", () => {
   terminal.innerHTML = "";
-  if (!isMuted) sounds.bgm.play();
+  startButton.style.visibility = "hidden";
   const modules = [];
   let currentModule = [];
   storyLines.forEach((line) => {
-    if (line === '__CLEAR__') {
-      if (currentModule.length > 0) {
-        modules.push(currentModule);
-      }
-      modules.push(['__CLEAR__']); // 将清空标志作为独立模块
-      currentModule = [];
-    } else if (line.includes('class="user"')) {
+    if (line.includes('class="user"')) {
       if (currentModule.length > 0) {
         modules.push(currentModule);
       }
@@ -181,30 +160,12 @@ startButton.addEventListener("click", () => {
         return;
       }
       const line = lines[currentLine];
-      if (line === '__CLEAR__') {
-        if (
-          lines[currentLine - 1] &&
-          extractTextFromHTML(lines[currentLine - 1]).includes("用户状态：离线") &&
-          !isMuted
-        ) {
-          sounds.disconnect.currentTime = 0;
-          sounds.disconnect.play();
-        }
-        terminal.innerHTML = "";
-        currentLine++;
-        setTimeout(typeLineInModule, 500);
-        return;
-      }
       const div = document.createElement("div");
       div.className = "line";
       if (line.includes('class="user"')) {
         div.classList.add("user-line");
       } else if (line.includes('class="system"')) {
         div.classList.add("system-line");
-        if (!isMuted) {
-          sounds.beep.currentTime = 0;
-          sounds.beep.play();
-        }
       }
       const textSpan = document.createElement("span");
       textSpan.className = "text";
@@ -216,21 +177,6 @@ startButton.addEventListener("click", () => {
       terminal.appendChild(div);
       typeHTML(line, textSpan, () => {
         cursorSpan.remove();
-        if (
-          extractTextFromHTML(line).includes("当前任务：继续等待") &&
-          !isMuted &&
-          sounds.key
-        ) {
-          sounds.bgm.pause();
-          sounds.bgm.currentTime = 0;
-          // if (sounds.bgm_wait) {
-          //   sounds.bgm_wait.play();
-          // }
-          setTimeout(() => {
-            sounds.key.currentTime = 0;
-            sounds.key.play();
-          }, 600); // 稍作停顿，更像“孤独开始”的声音
-        }
         currentLine++;
         setTimeout(typeLineInModule, 500);
       });
